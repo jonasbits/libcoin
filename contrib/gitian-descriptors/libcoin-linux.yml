@@ -1,0 +1,74 @@
+---
+name: "libcoin-linux"
+suites:
+- "precise"
+architectures:
+- "i386"
+- "amd64"
+packages: 
+- "g++"
+- "git-core"
+- "unzip"
+- "zip"
+- "pkg-config"
+- "autoconf2.13"
+- "libtool"
+- "automake"
+- "cmake"
+- "faketime"
+- "bsdmainutils"
+reference_datetime: "2013-06-01 00:00:00"
+remotes:
+- "url": "https://github.com/JeremyRand/libcoin.git"
+  "dir": "libcoin"
+files:
+- "bitcoin-deps-linux32-gitian-r6.zip"
+- "bitcoin-deps-linux64-gitian-r6.zip"
+- "boost-linux32-1.55.0-gitian-r1.zip"
+- "boost-linux64-1.55.0-gitian-r1.zip"
+- "sqlite-linux32-gitian-r1.zip"
+- "sqlite-linux64-gitian-r1.zip"
+script: |
+  STAGING="$HOME/install"
+  OPTFLAGS='-O2'
+  BINDIR="${OUTDIR}/bin/${GBUILD_BITS}" # 32/64 bit build specific output directory
+  TEMPDIR="$HOME/tempdir"
+  export TZ=UTC
+  export LIBRARY_PATH="$STAGING/lib"
+  export PATH="$STAGING/bin:$PATH"
+  mkdir -p ${BINDIR}
+  #
+  mkdir -p $STAGING
+  cd $STAGING
+  unzip ../build/bitcoin-deps-linux${GBUILD_BITS}-gitian-r6.zip
+  unzip ../build/boost-linux${GBUILD_BITS}-1.55.0-gitian-r1.zip
+  unzip ../build/sqlite-linux${GBUILD_BITS}-gitian-r1.zip
+  cd ../build
+
+  ### NOTE FROM JEREMY: The below is heavily simplified from the Bitcoin version, probably should be redone later
+  ### removed the linker script.... no idea if that's good or bad
+  
+  # Avoid exporting *any* symbols from the executable
+  # This avoids conflicts between the libraries statically linked into bitcoin and any
+  # libraries we may link dynamically (such as Qt and OpenSSL, see issue #4094).
+  # It also avoids start-up overhead to not export any unnecessary symbols.
+  # To do this, build a linker script that marks all symbols as local.
+  LINKER_SCRIPT=$HOME/build/linker_version_script
+  echo '
+  {
+    local: *;
+  };' > $LINKER_SCRIPT
+  function do_configure {
+      ./configure "$@" -DCMAKE_INSTALL_PREFIX:PATH=$STAGING -DCMAKE_INCLUDE_PATH:STRING=$STAGING/include -DCMAKE_LIBRARY_PATH:STRING=$STAGING/lib -DCMAKE_EXE_LINKER_FLAGS:STRING="${OPTFLAGS}" -DCMAKE_CXX_FLAGS:STRING="-frandom-seed=bitcoin ${OPTFLAGS}" -DDYNAMIC_LIBCOIN:BOOL=OFF
+  }
+  #
+  cd libcoin
+  do_configure -DEXECUTABLE_OUTPUT_PATH:PATH=$BINDIR
+
+  make
+  make install/strip
+  
+  cd $STAGING
+  
+  find bin | sort | zip -X@ $OUTDIR/libcoin-linux${GBUILD_BITS}-gitian.zip
+  cp -a $STAGING/bin/libcoind $BINDIR/
