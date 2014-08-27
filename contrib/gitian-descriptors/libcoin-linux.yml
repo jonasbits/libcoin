@@ -19,7 +19,7 @@ packages:
 - "bsdmainutils"
 reference_datetime: "2013-06-01 00:00:00"
 remotes:
-- "url": "https://github.com/JeremyRand/libcoin.git"
+- "url": "https://github.com/jonasbits/libcoin.git"
   "dir": "libcoin"
 files:
 - "bitcoin-deps-linux32-gitian-r6.zip"
