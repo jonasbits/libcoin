@@ -412,7 +412,7 @@ RegisterChain<TestNet3Chain> g_testnet3(testnet3);
 NamecoinTestnetChain::NamecoinTestnetChain() : Chain("namecointest", "NMCTST", 8), _genesis("00000007199508e34a9ff81e6ec0c477a4cccff2a4767a8eee39c11db367b008") {
     _alert_key = ParseHex("04fc9702847840aaf195de8442ebecedf5b095cdbb9bc716bda9110971b28a49e0ead8564ff0db22209e0374782c093bb899692d524e9d6a6956e7c5ecbcd68284");
     _magic[0] = 0xfa; _magic[1] = 0xbf; _magic[2] = 0xb5; _magic[3] = 0xfe;
-    const char* pszTimestamp = "... choose what comes next.  Lives of your own, or a return to chains. -- V";
+    const char* pszTimestamp = "The Times 03/Jan/2009 Chancellor on brink of second bailout for banks";
     Transaction txNew;
     Script signature = Script() << 486604799 << CBigNum(4) << vector<unsigned char>((const unsigned char*)pszTimestamp, (const unsigned char*)pszTimestamp + strlen(pszTimestamp));
     txNew.addInput(Input(Coin(), signature));
@@ -423,8 +423,10 @@ NamecoinTestnetChain::NamecoinTestnetChain() : Chain("namecointest", "NMCTST", 8
     _genesisBlock.updateMerkleTree(); // genesisBlock
     assert(_genesisBlock.getHash() == _genesis);
     
-   /* _checkpoints = boost::assign::map_list_of
-    (  2016, uint256("0x0000000000660bad0d9fbde55ba7ee14ddf766ed5f527e3fbca523ac11460b92"))
+    _checkpoints = boost::assign::map_list_of
+    (  61700, uint256("0x0000000000753e972b717d9a2d85f71584b0c92ce4e0fccc62df7315689b9d34"))
+    ;
+    /*(0x0000000000660bad0d9fbde55ba7ee14ddf766ed5f527e3fbca523ac11460b92"))
     (  4032, uint256("0x0000000000493b5696ad482deb79da835fe2385304b841beef1938655ddbc411"))
     (  6048, uint256("0x000000000027939a2e1d8bb63f36c47da858e56d570f143e67e85068943470c9"))
     (  8064, uint256("0x000000000003a01f708da7396e54d081701ea406ed163e519589717d8b7c95a5"))
@@ -562,7 +564,7 @@ int NamecoinTestnetChain::nextWorkRequired(BlockIterator blk) const {
     // Go back by what we want to be 14 days worth of blocks
     BlockIterator former = blk - (nInterval-1);
     
-    if (h >= 19200 && (h+1 > nInterval))
+    if (h >= 0 && (h+1 > nInterval))
         former = blk - nInterval;
     
     // Limit adjustment step
