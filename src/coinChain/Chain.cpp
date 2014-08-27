@@ -463,7 +463,7 @@ const int64_t NamecoinTestnetChain::subsidy(unsigned int height, uint256 prev) c
 
 bool NamecoinTestnetChain::isStandard(const Transaction& tx) const {
     // on testnet everything is allowed
-    true;
+    return true;
 
     // Extremely large transactions with lots of inputs can cost the network
     // almost as much to process as they cost the sender in fees, because
