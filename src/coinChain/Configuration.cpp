@@ -43,6 +43,7 @@ Configuration::Configuration(int argc, char* argv[], const options_description& 
     ("testnet3", "Use the test network")
     ("litecoin", "Run as a litecoin client")
     ("namecoin", "Run as a namecoin client")
+    ("namecointest", "Run as a namecoin testnet client")
     ("dogecoin", "Run as a dogecoin client")
     ("ripple", "Run as a ripple client")
     ;
@@ -106,6 +107,7 @@ Configuration::Configuration(int argc, char* argv[], const options_description& 
         if (args.count(*c) || prog_name.find(*c) != string::npos)
             _chain = Chains::select(*c);
     }
+    //ripple wants to be special, look at me, im special :-)
     if(args.count("ripple") || prog_name.find("ripped") != string::npos)
         _chain = &ripplecredits;
 
