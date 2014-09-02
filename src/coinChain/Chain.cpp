@@ -409,22 +409,23 @@ const TestNet3Chain testnet3;
 
 RegisterChain<TestNet3Chain> g_testnet3(testnet3);
 
-NamecoinChain::NamecoinChain() : Chain("namecoin", "NMC", 8), _genesis("000000000062b72c5e2ceb45fbc8587e807c155b0da735e6483dfba2f0a9c770") {
+NamecoinChain::NamecoinChain() : Chain("namecoin", "NMC", 8), _genesis("00000007199508e34a9ff81e6ec0c477a4cccff2a4767a8eee39c11db367b008") {
     _alert_key = ParseHex("04fc9702847840aaf195de8442ebecedf5b095cdbb9bc716bda9110971b28a49e0ead8564ff0db22209e0374782c093bb899692d524e9d6a6956e7c5ecbcd68284");
-    _magic[0] = 0xf9; _magic[1] = 0xbe; _magic[2] = 0xb4; _magic[3] = 0xfe;
-    const char* pszTimestamp = "... choose what comes next.  Lives of your own, or a return to chains. -- V";
+    _magic[0] = 0xfa; _magic[1] = 0xbf; _magic[2] = 0xb5; _magic[3] = 0xfe;
+    const char* pszTimestamp = "The Times 03/Jan/2009 Chancellor on brink of second bailout for banks";
     Transaction txNew;
-    Script signature = Script() << 0x1c007fff << CBigNum(522) << vector<unsigned char>((const unsigned char*)pszTimestamp, (const unsigned char*)pszTimestamp + strlen(pszTimestamp));
+    Script signature = Script() << 0x1d00ffff << CBigNum(4) << vector<unsigned char>((const unsigned char*)pszTimestamp, (const unsigned char*)pszTimestamp + strlen(pszTimestamp));
     txNew.addInput(Input(Coin(), signature));
-    Script script = Script() << ParseHex("04b620369050cd899ffbbc4e8ee51e8c4534a855bb463439d63d235d4779685d8b6f4870a238cf365ac94fa13ef9a2a22cd99d0d5ee86dcabcafce36c7acf43ce5") << OP_CHECKSIG;
+    Script script = Script() << ParseHex("04678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5f") << OP_CHECKSIG;
     txNew.addOutput(Output(50 * COIN, script));
-    _genesisBlock = Block(1, uint256(0), uint256(0), 1303000001, 0x1c007fff, 0xa21ea192U);
+    _genesisBlock = Block(1, uint256(0), uint256(0), 1296688602, 0x1d07fff8, 0x16ec0bffU);
     _genesisBlock.addTransaction(txNew);
     _genesisBlock.updateMerkleTree(); // genesisBlock
     assert(_genesisBlock.getHash() == _genesis);
     
     _checkpoints = boost::assign::map_list_of
-    (  2016, uint256("0x0000000000660bad0d9fbde55ba7ee14ddf766ed5f527e3fbca523ac11460b92"))
+    (  2016, uint256("0x00000000b9e4132e1a803114bc88df3e49184a3c794c01a6eac334f12f4ccadb"))
+    ;/*
     (  4032, uint256("0x0000000000493b5696ad482deb79da835fe2385304b841beef1938655ddbc411"))
     (  6048, uint256("0x000000000027939a2e1d8bb63f36c47da858e56d570f143e67e85068943470c9"))
     (  8064, uint256("0x000000000003a01f708da7396e54d081701ea406ed163e519589717d8b7c95a5"))
@@ -437,13 +438,13 @@ NamecoinChain::NamecoinChain() : Chain("namecoin", "NMC", 8), _genesis("00000000
     ( 57000, uint256("0xaa3ec60168a0200799e362e2b572ee01f3c3852030d07d036e0aa884ec61f203"))
     (112896, uint256("0x73f880e78a04dd6a31efc8abf7ca5db4e262c4ae130d559730d6ccb8808095bf"))
     (182000, uint256("0xd47b4a8fd282f635d66ce34ebbeb26ffd64c35b41f286646598abfd813cba6d9"))
-    ;
+    ;*/
     
 }
 
-unsigned int NamecoinChain::totalBlocksEstimate() const {
+/*unsigned int NamecoinChain::totalBlocksEstimate() const {
     return _checkpoints.rbegin()->first;
-}
+}*/
 
 
 const Block& NamecoinChain::genesisBlock() const {
@@ -460,7 +461,7 @@ const int64_t NamecoinChain::subsidy(unsigned int height, uint256 prev) const {
 }
 
 bool NamecoinChain::isStandard(const Transaction& tx) const {
-    
+    /*TESTNET allows everything
     // Extremely large transactions with lots of inputs can cost the network
     // almost as much to process as they cost the sender in fees, because
     // computing signature hashes is O(ninputs*txsize). Limiting transactions
@@ -494,7 +495,7 @@ bool NamecoinChain::isStandard(const Transaction& tx) const {
             return false;
         }
     }
-    
+    */
     return true;
 }
 
@@ -520,7 +521,7 @@ const bool NamecoinChain::checkProofOfWork(const Block& block) const {
     }
     
     if (block.getVersion()&BLOCK_VERSION_AUXPOW) {
-        if (!block.getAuxPoW().Check(block.getHash(), block.getVersion()/BLOCK_VERSION_CHAIN_START)) {
+        if (!block.getAuxPoW().Check(block.getHash(), block.getVersion()/BLOCK_VERSION_CHAIN_START, true)) {
             log_error("CheckProofOfWork() : AUX POW is not valid");
             return false;
         }
@@ -549,7 +550,7 @@ int NamecoinChain::nextWorkRequired(BlockIterator blk) const {
     // Genesis block
     int h = blk.height();
     if (h == 0) // trick to test that it is asking for the genesis block
-        return 0x1c007fff;
+        return 0x1d07fff8;
     
     // Only change once per interval
     if ((h + 1) % nInterval != 0)
@@ -558,7 +559,7 @@ int NamecoinChain::nextWorkRequired(BlockIterator blk) const {
     // Go back by what we want to be 14 days worth of blocks
     BlockIterator former = blk - (nInterval-1);
     
-    if (h >= 19200 && (h+1 > nInterval))
+    if (h >= 0 && (h+1 > nInterval))
         former = blk - nInterval;
     
     // Limit adjustment step
