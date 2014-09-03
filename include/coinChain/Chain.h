@@ -312,7 +312,7 @@ public:
 	int64_t start = 50 * CENT;
         int64_t res = start >> (height >> 13);
         res -= (res >> 14) * (height % 8192);
-	if (height == 2508) { //ugly hack to let block slip network fee
+	if (height == 2507) { //ugly hack to let block slip network fee
 	    log_warn("special case block height 2507:");
 	    log_warn("network fee %"PRI64d" was returned", res);
 	    log_warn("log something of use here");
