@@ -1094,8 +1094,12 @@ void BlockChain::append(const Block &block) {
 
     if (block.getBits() != _chain.nextWorkRequired(prev)) {
         // check if we can allow a block to slip through due to max time:
-        if (block.getTime() - (int)prev->time < _chain.maxInterBlockTime())
-            throw Error("Incorrect proof of work: " + lexical_cast<string>(block.getBits()) + " versus " + lexical_cast<string>(_chain.nextWorkRequired(prev)));
+        if (block.getTime() - (int)prev->time < _chain.maxInterBlockTime()) {
+           log_warn("Incorrect proof of work: " + lexical_cast<string>(block.getBits()) + " versus " + lexical_cast<string>(_chain.nextWorkRequired(prev))); //log_warn instead of throw Error
+	    
+	    log_warn("Incorrect, details: " + lexical_cast<string>(block.getTime()) + " " + lexical_cast<string>(prev->time) + " " + lexical_cast<string>(_chain.maxInterBlockTime()));
+	    
+	}
         else if ( block.getBits() != _chain.proofOfWorkLimit().GetCompact())
             throw Error("Incorrect proof of work (limit): " + lexical_cast<string>(block.getBits()) + " versus " + lexical_cast<string>(_chain.proofOfWorkLimit().GetCompact()));
     }
