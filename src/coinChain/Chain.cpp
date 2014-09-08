@@ -438,9 +438,9 @@ NamecoinChain::NamecoinChain() : Chain("namecoin", "NMC", 8), _genesis("00000007
     ;
 }
 
-/*unsigned int NamecoinChain::totalBlocksEstimate() const {
+unsigned int NamecoinChain::totalBlocksEstimate() const {
     return _checkpoints.rbegin()->first; //because of testnet allowing a block every 20 minutes, this will be broken
-}*/
+}
 
 
 const Block& NamecoinChain::genesisBlock() const {

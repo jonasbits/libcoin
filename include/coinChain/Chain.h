@@ -276,13 +276,14 @@ extern const TestNet3Chain testnet3;
 class COINCHAIN_EXPORT NamecoinChain : public Chain {
 public:
     NamecoinChain();
-    virtual const int protocol_version() const { return 37200; } // 0.3.72.0
+    virtual const int protocol_version() const { return 37602; } // 0.3.72.0
     virtual const Block& genesisBlock() const ;
     virtual const uint256& genesisHash() const { return _genesis; }
     virtual const int64_t subsidy(unsigned int height, uint256 prev = uint256(0)) const ;
     virtual bool isStandard(const Transaction& tx) const ;
     virtual const CBigNum proofOfWorkLimit() const { return CBigNum(~uint256(0) >> 28); }
     virtual int nextWorkRequired(BlockIterator blk) const;
+    virtual const int maxInterBlockTime() const { return 2*10*60; }
     virtual const bool checkProofOfWork(const Block& block) const;
     virtual bool adhere_aux_pow() const { return true; }
     virtual bool adhere_names() const { return true; }
@@ -295,7 +296,7 @@ public:
 
     
     virtual bool checkPoints(const unsigned int height, const uint256& hash) const ;
-    //virtual unsigned int totalBlocksEstimate() const;
+    virtual unsigned int totalBlocksEstimate() const;
     
     virtual int64_t min_fee() const {
         return 500000;
@@ -309,18 +310,16 @@ public:
         if ((height >> 13) >= 60)
             return 0;
        
-	int64_t start = 50 * CENT;
+	int64_t start = 10 * CENT; //10 in testnet, 50 in mainnet
         int64_t res = start >> (height >> 13);
         res -= (res >> 14) * (height % 8192);
 	if (height == 2507) { //ugly hack to let block slip network fee
 	    log_warn("special case block height 2507:");
 	    log_warn("network fee %"PRI64d" was returned", res);
 	    log_warn("log something of use here");
-	    return 0;
 	}
-	else
-	    //return res; //get by the 2506 block obstacle with no network fee, return 0 
-            return 0; 
+	return res; //get by the 2506 block obstacle with no network fee, return 0 
+        
     }
     
     virtual int expirationDepth(int count) const {
